@@ -1,36 +1,63 @@
-# AIFFEL Thon 
+# 차량 파손 탐지 모델 개발
 
-## Project
-- 이미지와 텍스트를 모두 처리할 수 있는 생성형 멀티모달 챗봇
+소속: 개인
+분야: Segmentation
 
-### 내가 수행한 Task
-- 차량파손 종류와 위치 탐지 모델 
+<aside>
+💡
 
-### 쏘카 차량 파손 데이터
-- Dent(찌그러짐)
-- Scratch(긁힘)
-- Spacing(이격)
+학습에 사용된 이미지 들은 쏘카의 데이터로 공개 불가
 
+</aside>
 
-### 사용 모델 
-- U-Net++
-- U-Net++ 사용 이유 : 적은 데이터, 속도도 빠르다.  
-- unet++는 skip pathways에서 dense convolution block 들을 통해 추출된 feature map들이 unet에 비해서 fine-grained detail을 더 잘 포착할 수 있도록 합니다.
-- 파손 종류별로 하나씩 모델을 만듬
+## 프로젝트 개요
 
+### 프로젝트 목표
 
-### Image Crop
-- 파손 영역만 crop하여 학습
-- IoU score 3% 개선
+> 차량 이미지를 입력하면 파손 여부, 파손 위치, 파손 종류를 출력하는 모델 개발
+> 
 
+### 프로젝트 조건
 
-### Dual Channel training
-- 일반적인 semantic segmentation 방식으로는 binary classification 문제에서 "파손인가 아닌가?" 만을 탐지
-- 이 방식을 개선시켜 back-ground와 fore-ground를 분리하여 학습 
-- 이렇게 할 경우 손실되는 정보량이 줄어들어 성능이 개선될 가능성이 있음
-- 실제로 iou score가 30% 가량 개선
+- Dent(찌그러짐), Scratch(긁힘), Spacing(이격)을 구분 가능해야함
+- 파손이 없는 차량 이미지를 넣었을 때, 파손이 없다고 출력해야함
 
+## 모델 기본 설계
 
+### U-net++
 
+![model](/Users/kimtaejong/Personal/Github/SocarChatbot/image/model.png)
 
+- 각각의 모델이 하나의 파손 부위를 찾도록 학습
+- U-Net++ 사용 이유
+    - 기본적으로 많은 데이터를 확보하기 어려운 의료 데이터에 활용하기 위해 사용하던 모델이라 적은 데이터에도 우수한 성능을 보임
+    - 마찬가지로 인간의 상처나 장기의 미세한 결함을 발견하기 위해 고안된 모델이라 파손 영역처럼 미세한 부분도 잘 포착할 수 있을 것으로 판단
+    - 컨텍스트 정보를 잘 사용하면서도 정확히 지역화함
+    - end2end 구조로 속도가 빠름
+- unet++는 skip pathways에서 dense convolution block 들을 통해 추출된 feature map들이 unet에 비해서 fine-grained detail을 더 잘 포착할 수 있음
 
+### Data Augmentation
+
+- 이미지들을 랜덤하게 회전, 반전 등을 하여 부족한 학습 데이터를 보강
+- 파손 이미지의 특성상 전체 사진에서 파손 부위가 차지하는 비중이 작아 파손 부위를 Crop 하여 학습. Crop 역시 크기를 랜덤하게 지정하여 데이터를 증강
+
+### Output Channel
+
+- 현재 과제의 경우 하나의 모델이 하나의 파손만을 찾으므로 일반적으로는 하나의 채널을 사용하여 이진분류 형태로 학습.
+- 두 개의 채널을 사용하면 파손을 찾는 채널과 배경을 찾는 채널 두 개로 학습이 되어 성능이 개선
+- 실제로 하나의 채널에 비해 두 개의 채널을 사용했을 때, IoU score가 30% 가량 개선
+
+## 최종 결과물
+
+![result](/Users/kimtaejong/Personal/Github/SocarChatbot/image/result.png)
+
+### 성능 평가
+
+- 파손 영역을 Crop해 학습 하는 방법으로 IoU score 3% 개선
+- 각 모델이 출력 채널을 2개로 하여 IoU score 30% 개선
+- 최종적으로 75%의 IoU score 달성
+
+## 느낀점과 한계
+
+- 어떤 모델을 사용하는지 보다 데이터를 얼마나 학습에 적당하도록 전처리를 하는가가 성능에 더 큰 영향이 있었음
+- 파손 영역의 boundary를 라벨링 해서 세 개의 채널로 학습을 하면 더 높은 성능을 기대할 수 있을 것으로 생각됨
