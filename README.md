@@ -26,7 +26,7 @@
 
 ### U-net++
 
-![model](/Users/kimtaejong/Personal/Github/SocarChatbot/image/model.png)
+![model](https://github.com/user-attachments/assets/9a7ff2eb-3d01-4335-bc7e-d73945ca8267)
 
 - 각각의 모델이 하나의 파손 부위를 찾도록 학습
 - U-Net++ 사용 이유
@@ -49,7 +49,7 @@
 
 ## 최종 결과물
 
-![result](/Users/kimtaejong/Personal/Github/SocarChatbot/image/result.png)
+![result](https://github.com/user-attachments/assets/17705da5-aab4-42a2-a544-4bca4fb6db32)
 
 ### 성능 평가
 
